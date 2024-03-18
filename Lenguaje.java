@@ -1,9 +1,11 @@
-import java.util.HashMap;
+import java.util.*;
+
 
 public class Lenguaje {
     char[] noTerminales = {'X', 'Y', 'Z', 'W'};
     char [] terminales = {'1' , '2', '3'};
     char inicial;
+    char visitado;
     //Nodo raiz;
    
     HashMap<Character, String[]> tr = new HashMap<>();
@@ -12,9 +14,10 @@ public class Lenguaje {
        
         tr.put('X', new String[] {"YZ1", "W2W3", "2"});
         tr.put('Y', new String[]{"Z1Z2Z3", "YW1", "1"});
-        tr.put('Z', new String[] {"W", "YZ", "3"});
+        tr.put('Z', new String[] {"W", "Y2", "3"});
         tr.put('W', new String[]{"2", "YZ", "1"});
         inicial = 'X';
+        
     }
    
     public boolean esNoTerminal(char letra){
@@ -36,6 +39,36 @@ public class Lenguaje {
         }
         return esT;
     }
+
+    public void producciones(char noTerminales, Set<Character> visitado, List<String> terminales){
+        if(visitado.contains(noTerminales)){
+            return;
+        }
+        visitado.add(noTerminales);
+
+        String [] reglas= tr.getOrDefault(noTerminales, new String[0]);
+
+        for(String regla: reglas){
+            StringBuilder terminal= new StringBuilder();
+            String[] simbolos= regla.split("");
+            for(String simbolo: simbolos){
+                if(!simbolo.isEmpty()){
+                    char caracter= simbolo.charAt(0);
+                    if(esNoTerminal(caracter)){
+                    producciones(caracter, visitado, terminales);
+                    } else if(esTerminal(caracter)){
+                        terminal.append(caracter);
+
+                    }
+                }
+            }
+            if(terminal.length()>0){
+            terminales.add(terminal.toString());
+            }
+
+        }
+    }
+    
     /*public Nodo construirArbol() {
         Nodo raiz = new Nodo();
         raiz.setDato(inicial);
@@ -44,13 +77,13 @@ public class Lenguaje {
      
     public void traslate(){
        
-        String[] reglas1 = tr.get(inicial);
+        Set<Character> visitado = new HashSet<>();
+        List<String> terminales= new ArrayList<>();
+        producciones(inicial, visitado, terminales);
+
+        System.out.println("Lenguaje{" + String.join(", ", terminales) + "}");
+
        
-    }
-   
-     public static void main(String[] args) {
-        Lenguaje lenguaje = new Lenguaje();
-        lenguaje.traslate(); // Llamar al método traslate() para que se ejecute
     }
    
 }
